@@ -4,7 +4,7 @@ A fully playable two-player chess game built from scratch in Python with PyGame.
 
 This was written step by step as a learning project. The code is intentionally kept explicit and readable rather than clever, so it doubles as a walkthrough of how a chess engine's rules can be built up piece by piece.
 
-> A Slovak-commented version of the source is also available in this repository (`sach.py`).
+> A Slovak-commented version of the source is also available in this repository.
 
 ## Features
 
