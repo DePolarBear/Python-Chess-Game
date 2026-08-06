@@ -67,7 +67,7 @@ pieces/
 
 ## How to run
 
-1. Make sure the `pieces/` folder with the 12 SVG files sits next to `chess.py`.
+1. Make sure the `chess_pieces/` folder with the 12 SVG files sits next to `chess.py`.
 2. Run:
 
 ```bash
