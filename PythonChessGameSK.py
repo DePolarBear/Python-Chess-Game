@@ -229,6 +229,29 @@ def nakresli_koniec():
     ty = restart_btn.centery - text_btn.get_height() // 2
     screen.blit(text_btn, (tx, ty))
 
+def nakresli_sach():
+    for farba in ("w", "b"):              # skontroluj oboch kráľov
+        if je_sach(doska, farba):          # je tento kráľ v šachu?
+            if farba == "w":
+                kral = "K"
+            else:
+                kral = "k"
+            # nájdi kráľa na doske a zvýrazni jeho políčko
+            for r in range(8):
+                for s in range(8):
+                    if doska[r][s] == kral:
+                        x = s * STVOREC
+                        y = r * STVOREC
+                        pygame.draw.rect(screen, (200, 0, 0), (x, y, STVOREC, STVOREC), 2)
+
+def nakresli_na_tahu():
+    if na_tahu == "w":
+        # biely je dole - pruh dole
+        pygame.draw.rect(screen, (0, 200, 0), (0, VYSKA - 4, SIRKA, 4))
+    else:
+        # čierny je hore - pruh hore
+        pygame.draw.rect(screen, (0, 200, 0), (0, 0, SIRKA, 4))
+
 def nova_doska():
     return [
         ["r","n","b","q","k","b","n","r"],
@@ -274,6 +297,10 @@ while running:
                     if je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, riadok, stlpec) and not ostane_kral_v_sachu(doska, na_tahu, stary_riadok, stary_stlpec, riadok, stlpec):
                         doska[riadok][stlpec] = figurka
                         doska[stary_riadok][stary_stlpec] = "."
+                        if figurka == "P" and riadok == 0:
+                            doska[riadok][stlpec] = "Q"
+                        if figurka == "p" and riadok == 7:
+                            doska[riadok][stlpec] = "q"
                         vybrane = None
                         if na_tahu == "w":
                             na_tahu = "b"
@@ -295,6 +322,13 @@ while running:
                     koniec = None
 
     nakresli_dosku()
+    if na_tahu == "w":
+        titulok = "Na tahu: biely"
+    else:
+        titulok = "Na tahu: cierny"
+    pygame.display.set_caption(titulok)
+    nakresli_sach()
+    nakresli_na_tahu()
     nakresli_moznosti()
     nakresli_figurku()
     nakresli_vyber()
