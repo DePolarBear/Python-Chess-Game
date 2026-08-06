@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 # --- Konštanty (veci, ktoré sa nemenia) ---
-STVOREC = 80                    # veľkosť jedného políčka v pixeloch
+STVOREC = 110                    # veľkosť jedného políčka v pixeloch
 SIRKA = VYSKA = STVOREC * 8     # doska je 8x8 políčok -> 640x640
 
 # Farby políčok (RGB)
@@ -16,6 +16,17 @@ male_pismo = pygame.font.SysFont("Arial", 40)
 screen = pygame.display.set_mode((SIRKA, VYSKA))
 pygame.display.set_caption("Python Chess")
 clock = pygame.time.Clock()
+
+obrazky = {}                          # prázdny slovník, naplníme ho
+for pismeno in "PRNBQKprnbqk":        # prejdi všetkých 12 písmen
+    if pismeno.isupper():
+        farba = "w"
+    else:
+        farba = "b"
+    nazov = "chess_pieces/" + farba + pismeno.upper() + ".svg"   # napr. figurky/wP.svg
+    obr = pygame.image.load_sized_svg(nazov, (STVOREC, STVOREC))
+    obr = obr.convert_alpha()
+    obrazky[pismeno] = obr
 
 def nakresli_dosku():
     for riadok in range(8):             # 0 až 7 (osem riadkov)
@@ -35,16 +46,10 @@ def nakresli_figurku():
         for stlpec in range(8):         # 0 až 7 (osem stĺpcov)
             figurka = doska[riadok][stlpec]
             if figurka != ".":  # Podmienka vykreslenia
-                if figurka.isupper():  # Volba farby figurky, ak je pismeno velke biela aj nie je velke cierna
-                    farba = (255, 255, 255)   # biela
-                else:
-                    farba = (0, 0, 0)         # čierna
-                obrazok = pismo.render(figurka, True, farba)
-                sirka = obrazok.get_width()  # Vypocet sirky pismenka
-                vyska = obrazok.get_height()  # Vypocet vysky pismenka
-                x = stlpec * STVOREC + (STVOREC - sirka) // 2  # Pozicia pismenka + centrovanie
-                y = riadok * STVOREC + (STVOREC - vyska) // 2  # Pozicia pismenka + centrovanie
-                screen.blit(obrazok, (x, y))  # Vykreslenie pismenka na suradnicu x a y
+                obrazok = obrazky[figurka]
+                x = stlpec * STVOREC
+                y = riadok * STVOREC
+                screen.blit(obrazok, (x, y))
 
 def nakresli_vyber():
     if vybrane is None:
