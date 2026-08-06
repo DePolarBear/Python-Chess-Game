@@ -11,6 +11,7 @@ SVETLA = (240, 217, 181)        # svetlé pole
 TMAVA  = (181, 136, 99)         # tmavé pole
 
 pismo = pygame.font.SysFont("Arial", 60)
+male_pismo = pygame.font.SysFont("Arial", 40)
 
 screen = pygame.display.set_mode((SIRKA, VYSKA))
 pygame.display.set_caption("Python Chess")
@@ -51,7 +52,7 @@ def nakresli_vyber():
     riadok, stlpec = vybrane
     x = stlpec * STVOREC
     y = riadok * STVOREC
-    pygame.draw.rect(screen, (0, 255, 0), (x, y, STVOREC, STVOREC), 2)
+    pygame.draw.rect(screen, (0, 150, 0), (x, y, STVOREC, STVOREC), 2)
 
 def nakresli_moznosti():
     if vybrane is None:
@@ -59,8 +60,8 @@ def nakresli_moznosti():
     vyb_riadok, vyb_stlpec = vybrane
     figurka = doska[vyb_riadok][vyb_stlpec]
     zvyraznenie = pygame.Surface((STVOREC, STVOREC))   # malá plocha veľkosti políčka
-    zvyraznenie.set_alpha(100)                          # priehľadnosť: 0 = neviditeľné, 255 = plné
-    zvyraznenie.fill((0, 255, 0))                       # vyplň zelenou
+    zvyraznenie.set_alpha(50)                          # priehľadnosť: 0 = neviditeľné, 255 = plné
+    zvyraznenie.fill((0, 200, 0))                       # vyplň zelenou
 
     for r in range(8):
         for s in range(8):
@@ -149,28 +150,104 @@ def je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, novy_riadok, novy_
 
         return False
 
+def je_sach(doska, farba):
+    if farba == "w":
+        kral = "K"
+    else:
+        kral = "k"
 
-doska = [
-    ["r","n","b","q","k","b","n","r"],
-    ["p"] * 8,
-    ["."] * 8,
-    ["."] * 8,
-    ["."] * 8,
-    ["."] * 8,
-    ["P"] * 8,
-    ["R","N","B","Q","K","B","N","R"]
-]
+    if farba == "w":
+        super_farba = "b"
+    else:
+        super_farba = "w"
 
-#for i in range(8):
-#    riadok = [".",".",".",".",".",".",".","."]
-#    doska.append(riadok)
+    for r in range(8):
+        for s in range(8):
+            if doska[r][s] == kral:
+                kral_riadok = r
+                kral_stlpec = s
+    for r in range(8):
+        for s in range(8):
+            f = doska[r][s]
+            if f != ".":
+                if f.isupper():
+                    f_farba = "w"
+                else:
+                    f_farba = "b"
+                if f_farba == super_farba:
+                    if je_tah_platny(doska, f, r, s, kral_riadok, kral_stlpec):
+                        return True
+    return False
 
-for r in doska:
-    print(r)
+def ostane_kral_v_sachu(doska, farba, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
+    figurka = doska[stary_riadok][stary_stlpec]      # koho ťaháme
+    povodny_ciel = doska[novy_riadok][novy_stlpec]   # čo bolo na cieli (možno súper, možno bodka)
+    doska[novy_riadok][novy_stlpec] = figurka
+    doska[stary_riadok][stary_stlpec] = "."
+    v_sachu = je_sach(doska, farba)
+    doska[stary_riadok][stary_stlpec] = figurka
+    doska[novy_riadok][novy_stlpec] = povodny_ciel
+    return v_sachu
 
+def ma_legalny_tah(doska, farba):
+    for fr in range(8):                 # figúrka: riadok
+        for fs in range(8):             # figúrka: stĺpec
+            f = doska[fr][fs]
+            if f == ".":
+                continue
+            if f.isupper():
+                f_farba = "w"
+            else:
+                f_farba = "b"
+            if f_farba != farba:
+                continue
+            
+            for cr in range(8):         # cieľ: riadok
+                for cs in range(8):     # cieľ: stĺpec
+                    if je_tah_platny(doska, f, fr, fs, cr, cs) and not ostane_kral_v_sachu(doska, farba, fr, fs, cr, cs):
+                        return True
+    return False
+
+def nakresli_koniec():
+    if koniec is None:
+        return
+    pruh = pygame.Surface((SIRKA, 100))    # široký ako doska, vysoký 100 px
+    pruh.set_alpha(200)                     # dosť nepriehľadný, nech text vynikne
+    pruh.fill((0, 0, 0))                    # čierny podklad
+    screen.blit(pruh, (0, VYSKA // 2 - 50)) # zvisle na stred (polovica výšky mínus pol pruhu)
+    obrazok = pismo.render(koniec, True, (255, 255, 255))
+    sirka = obrazok.get_width()
+    vyska = obrazok.get_height()
+    x = SIRKA // 2 - sirka // 2
+    y = VYSKA // 2 - vyska // 2
+    screen.blit(obrazok, (x, y))
+
+    pygame.draw.rect(screen, (70, 70, 70), restart_btn)          # sivý obdĺžnik tlačidla
+    text_btn = male_pismo.render("Restart", True, (255, 255, 255))
+    # a text vycentrovať na stred tlačidla:
+    tx = restart_btn.centerx - text_btn.get_width() // 2
+    ty = restart_btn.centery - text_btn.get_height() // 2
+    screen.blit(text_btn, (tx, ty))
+
+def nova_doska():
+    return [
+        ["r","n","b","q","k","b","n","r"],
+        ["p"] * 8,
+        ["."] * 8,
+        ["."] * 8,
+        ["."] * 8,
+        ["."] * 8,
+        ["P"] * 8,
+        ["R","N","B","Q","K","B","N","R"],
+    ]
+
+doska = nova_doska()
 
 running = True
 vybrane = None
+na_tahu = "w"      # biely začína
+koniec = None      # kým hra beží; keď skončí, dáme sem text výsledku
+restart_btn = pygame.Rect(SIRKA // 2 - 80, VYSKA // 2 + 60, 160, 50)
 
 while running:
     for event in pygame.event.get():
@@ -178,30 +255,50 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mysx, mysy = pygame.mouse.get_pos()
-            stlpec = mysx // STVOREC
-            riadok = mysy // STVOREC
-            
-            if vybrane is None:
-                if doska[riadok][stlpec] != ".":
-                    vybrane = (riadok, stlpec)
-            else:
-                stary_riadok, stary_stlpec = vybrane
-                figurka = doska[stary_riadok][stary_stlpec]
-                if je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, riadok, stlpec):
-                    doska[riadok][stlpec] = figurka
-                    doska[stary_riadok][stary_stlpec] = "."
-                    vybrane = None
+            if koniec is None:
+                stlpec = mysx // STVOREC
+                riadok = mysy // STVOREC
+                
+                if vybrane is None:
+                    klik = doska[riadok][stlpec]
+                    if klik != ".":
+                        if klik.isupper():
+                            farba_figurky = "w"
+                        else:
+                            farba_figurky = "b"
+                        if farba_figurky == na_tahu:
+                            vybrane = (riadok, stlpec)
                 else:
+                    stary_riadok, stary_stlpec = vybrane
+                    figurka = doska[stary_riadok][stary_stlpec]
+                    if je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, riadok, stlpec) and not ostane_kral_v_sachu(doska, na_tahu, stary_riadok, stary_stlpec, riadok, stlpec):
+                        doska[riadok][stlpec] = figurka
+                        doska[stary_riadok][stary_stlpec] = "."
+                        vybrane = None
+                        if na_tahu == "w":
+                            na_tahu = "b"
+                        else:
+                            na_tahu = "w"
+                        if not ma_legalny_tah(doska, na_tahu):
+                            if je_sach(doska, na_tahu):
+                                koniec = "MAT - vyhral " + ("cierny" if na_tahu == "w" else "biely")
+                            else:
+                                koniec = "PAT - remiza"
+                    else:
+                        vybrane = None
+                print(vybrane)
+            else:
+                if restart_btn.collidepoint(mysx, mysy):
+                    doska = nova_doska()
+                    na_tahu = "w"
                     vybrane = None
-
-
-
-            print(vybrane)
+                    koniec = None
 
     nakresli_dosku()
     nakresli_moznosti()
     nakresli_figurku()
     nakresli_vyber()
+    nakresli_koniec()
 
     pygame.display.flip()
     clock.tick(60)
