@@ -44,10 +44,6 @@ Every piece follows correct chess movement, validated in `is_move_valid`:
 - A translucent banner across the board announces the result (checkmate, stalemate or time out).
 - A **Restart** button in the panel resets the board, clocks and all state at any time.
 
-## Screenshots
-
-*(Add your own screenshots here, e.g. `![Board](screenshots/board.png)`)*
-
 ## Requirements
 
 - Python 3.x
@@ -59,7 +55,7 @@ python -m pip install pygame-ce
 
 ## Piece images
 
-The game loads piece graphics from a `pieces/` folder (the Slovak version uses `figurky/`). It expects 12 SVG files named by color and piece:
+The game loads piece graphics from a `chess_pieces/` folder (the Slovak version uses `figurky/`). It expects 12 SVG files named by color and piece:
 
 ```
 pieces/
