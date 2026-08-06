@@ -54,6 +54,32 @@ def nakresli_vyber():
     pygame.draw.rect(screen, (0, 255, 0), (x, y, STVOREC, STVOREC), 2)
 
 def je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
+    d_riadok = novy_riadok - stary_riadok
+    d_stlpec = novy_stlpec - stary_stlpec
+
+    if d_riadok > 0:
+        krok_riadok = 1
+    elif d_riadok < 0:
+        krok_riadok = -1
+    else:
+        krok_riadok = 0
+
+    if d_stlpec > 0:
+        krok_stlpec = 1
+    elif d_stlpec < 0:
+        krok_stlpec = -1
+    else:
+        krok_stlpec = 0
+    
+    r = stary_riadok + krok_riadok
+    s = stary_stlpec + krok_stlpec
+    # kráčaj, kým si nedošiel na cieľ
+    while (r, s) != (novy_riadok, novy_stlpec):
+        if doska[r][s] != ".":
+            return False        # niečo stojí v ceste
+        r = r + krok_riadok     # ďalší krok
+        s = s + krok_stlpec
+    return True
 
 def je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
     ciel = doska[novy_riadok][novy_stlpec]
@@ -66,17 +92,17 @@ def je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, novy_riadok, novy_
         d_stlpec = novy_stlpec - stary_stlpec
 
         if figurka.lower() == "r":
-            if d_riadok == 0 or d_stlpec == 0:
+            if (d_riadok == 0 or d_stlpec == 0) and je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
                 return True
             else:
                 return False
         if figurka.lower() == "b":
-            if abs(d_riadok) == abs(d_stlpec):
+            if (abs(d_riadok) == abs(d_stlpec)) and je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
                 return True
             else:
                 return False
         if figurka.lower() == "q":
-            if d_riadok == 0 or d_stlpec == 0 or abs(d_riadok) == abs(d_stlpec):
+            if (d_riadok == 0 or d_stlpec == 0 or abs(d_riadok) == abs(d_stlpec)) and je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
                 return True
             else:
                 return False
@@ -99,7 +125,7 @@ def je_tah_platny(doska, figurka, stary_riadok, stary_stlpec, novy_riadok, novy_
                 start = 1
             if d_stlpec == 0 and d_riadok == smer and ciel == ".":
                 return True
-            if d_stlpec == 0 and d_riadok == 2 * smer and ciel == "." and stary_riadok == start:
+            if (d_stlpec == 0 and d_riadok == 2 * smer and ciel == "." and stary_riadok == start) and je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
                 return True
             if abs(d_stlpec) == 1 and d_riadok == smer and ciel != ".":
                 return True
