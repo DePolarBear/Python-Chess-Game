@@ -53,6 +53,23 @@ def nakresli_vyber():
     y = riadok * STVOREC
     pygame.draw.rect(screen, (0, 255, 0), (x, y, STVOREC, STVOREC), 2)
 
+def nakresli_moznosti():
+    if vybrane is None:
+        return
+    vyb_riadok, vyb_stlpec = vybrane
+    figurka = doska[vyb_riadok][vyb_stlpec]
+    zvyraznenie = pygame.Surface((STVOREC, STVOREC))   # malá plocha veľkosti políčka
+    zvyraznenie.set_alpha(100)                          # priehľadnosť: 0 = neviditeľné, 255 = plné
+    zvyraznenie.fill((0, 255, 0))                       # vyplň zelenou
+
+    for r in range(8):
+        for s in range(8):
+            if je_tah_platny(doska, figurka, vyb_riadok, vyb_stlpec, r, s):
+                x = s * STVOREC
+                y = r * STVOREC
+                screen.blit(zvyraznenie, (x, y))
+
+
 def je_cesta_volna(doska, stary_riadok, stary_stlpec, novy_riadok, novy_stlpec):
     d_riadok = novy_riadok - stary_riadok
     d_stlpec = novy_stlpec - stary_stlpec
@@ -182,6 +199,7 @@ while running:
             print(vybrane)
 
     nakresli_dosku()
+    nakresli_moznosti()
     nakresli_figurku()
     nakresli_vyber()
 
